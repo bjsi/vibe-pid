@@ -54,10 +54,6 @@ const SettingsModal = ({ onApiKeyChange }: SettingsModalProps) => {
               onChange={(e) => setApiKey(e.target.value)}
               className="font-mono"
             />
-            <p className="text-xs text-muted-foreground">
-              Your API key is stored locally in your browser. For better security,
-              consider connecting to Supabase.
-            </p>
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSave}>Save Settings</Button>
@@ -69,3 +65,4 @@ const SettingsModal = ({ onApiKeyChange }: SettingsModalProps) => {
 };
 
 export default SettingsModal;
+
