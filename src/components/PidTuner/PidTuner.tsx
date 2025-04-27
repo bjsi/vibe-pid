@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +5,7 @@ import InputSection from "./InputSection";
 import OutputSection from "./OutputSection";
 import DataInputSection from "./DataInputSection";
 import DataVisualization from "./DataVisualization";
+import SettingsModal from "./SettingsModal";
 import { toast } from "sonner";
 
 export interface PidData {
@@ -27,10 +27,16 @@ const PidTuner = () => {
   const [parsedData, setParsedData] = useState<PidData[]>([]);
   const [activeTab, setActiveTab] = useState<string>("input");
   const [previousSuggestions, setPreviousSuggestions] = useState<string[]>([]);
+  const [apiKey, setApiKey] = useState<string>("");
   
   const handleGetSuggestion = async () => {
     if (!prompt.trim()) {
       toast.error("Please describe what you want to tune");
+      return;
+    }
+
+    if (!apiKey) {
+      toast.error("Please set your OpenAI API key in settings");
       return;
     }
     
@@ -53,7 +59,7 @@ Try these values first and then share the resulting data so I can help refine th
       toast.success("Received PID parameter suggestions!");
       setActiveTab("output");
     } catch (error) {
-      toast.error("Failed to get suggestions. Please try again.");
+      toast.error("Failed to get suggestions. Please check your API key and try again.");
       console.error("Error getting suggestion:", error);
     } finally {
       setLoading(false);
@@ -136,8 +142,9 @@ I've reduced Kp slightly to decrease overshoot and increased Ki to improve stead
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>PID Controller Tuning Assistant</CardTitle>
+          <SettingsModal onApiKeyChange={setApiKey} />
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
