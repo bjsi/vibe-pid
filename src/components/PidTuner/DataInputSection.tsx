@@ -23,7 +23,7 @@ const DataInputSection = ({ csvData, onDataInput, loading }: DataInputSectionPro
         </pre>
       </div>
 
-      <Alert variant="outline" className="bg-amber-50 border-amber-200">
+      <Alert variant="default" className="bg-amber-50 border-amber-200">
         <AlertCircle className="h-4 w-4 text-amber-600" />
         <AlertTitle className="text-amber-800">Important</AlertTitle>
         <AlertDescription className="text-amber-700">
