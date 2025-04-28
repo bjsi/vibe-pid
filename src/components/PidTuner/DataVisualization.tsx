@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Copy } from "lucide-react";
 import { PidData } from "./PidTuner";
+import { toast } from "sonner";
 import { 
   LineChart, 
   Line, 
@@ -12,7 +13,8 @@ import {
   Legend, 
   ResponsiveContainer 
 } from "recharts";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import html2canvas from "html2canvas";
 
 interface DataVisualizationProps {
   data: PidData[];
@@ -22,6 +24,34 @@ interface DataVisualizationProps {
 
 const DataVisualization = ({ data, onNewIteration, loading }: DataVisualizationProps) => {
   const [visualization, setVisualization] = useState<"response" | "variables">("response");
+  const chartRef = useRef<HTMLDivElement>(null);
+  
+  const handleCopyGraph = async () => {
+    if (chartRef.current) {
+      try {
+        const canvas = await html2canvas(chartRef.current);
+        const dataUrl = canvas.toDataURL();
+        const blob = await (await fetch(dataUrl)).blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob })
+        ]);
+        toast.success("Graph copied to clipboard");
+      } catch (error) {
+        toast.error("Failed to copy graph");
+      }
+    }
+  };
+
+  const handleCopyContext = () => {
+    const context = {
+      data,
+      currentView: visualization,
+      latestValues: data[data.length - 1],
+      timestamp: new Date().toISOString(),
+    };
+    navigator.clipboard.writeText(JSON.stringify(context, null, 2));
+    toast.success("Context data copied to clipboard");
+  };
   
   if (data.length === 0) {
     return (
@@ -33,13 +63,34 @@ const DataVisualization = ({ data, onNewIteration, loading }: DataVisualizationP
     );
   }
   
-  // Get the latest PID values
   const latestValues = data[data.length - 1];
   
   return (
     <div className="space-y-4 py-4">
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">PID Response Visualization</h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">PID Response Visualization</h3>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleCopyGraph}
+              className="flex items-center gap-2"
+            >
+              <Copy className="h-4 w-4" />
+              Copy Graph
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleCopyContext}
+              className="flex items-center gap-2"
+            >
+              <Copy className="h-4 w-4" />
+              Copy Context
+            </Button>
+          </div>
+        </div>
         <div className="flex justify-between items-center">
           <p className="text-sm text-gray-500">
             Visualizing {data.length} data points from your test run.
@@ -67,7 +118,7 @@ const DataVisualization = ({ data, onNewIteration, loading }: DataVisualizationP
       
       <Card>
         <CardContent className="p-4">
-          <div className="h-[400px] w-full">
+          <div className="h-[400px] w-full" ref={chartRef}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={data}

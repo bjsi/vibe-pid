@@ -1,8 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Loader2, X } from "lucide-react";
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 interface InputSectionProps {
   prompt: string;
@@ -48,6 +49,12 @@ const InputSection = ({
           Tell us about what you're trying to control (e.g., temperature, motor position),
           the system characteristics, and any specific requirements.
         </p>
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Pro tip: You can paste images (screenshots, graphs, etc.) directly into the text box below by using Ctrl+V or Cmd+V.
+          </AlertDescription>
+        </Alert>
       </div>
       
       {attachedImages.length > 0 && (

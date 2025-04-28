@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Settings } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -8,25 +9,32 @@ import { toast } from "sonner";
 
 interface SettingsModalProps {
   onApiKeyChange: (key: string) => void;
+  onModelChange?: (model: string) => void;
 }
 
-const SettingsModal = ({ onApiKeyChange }: SettingsModalProps) => {
+const SettingsModal = ({ onApiKeyChange, onModelChange }: SettingsModalProps) => {
   const [apiKey, setApiKey] = useState("");
+  const [model, setModel] = useState("gpt-4o");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const savedKey = localStorage.getItem("openai_api_key");
+    const savedModel = localStorage.getItem("openai_model") || "gpt-4o";
     if (savedKey) {
       setApiKey(savedKey);
       onApiKeyChange(savedKey);
     }
-  }, [onApiKeyChange]);
+    setModel(savedModel);
+    onModelChange?.(savedModel);
+  }, [onApiKeyChange, onModelChange]);
 
   const handleSave = () => {
     if (apiKey.trim()) {
       localStorage.setItem("openai_api_key", apiKey);
+      localStorage.setItem("openai_model", model);
       onApiKeyChange(apiKey);
-      toast.success("API key saved successfully");
+      onModelChange?.(model);
+      toast.success("Settings saved successfully");
       setOpen(false);
     } else {
       toast.error("Please enter an API key");
@@ -55,6 +63,19 @@ const SettingsModal = ({ onApiKeyChange }: SettingsModalProps) => {
               className="font-mono"
             />
           </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Model</p>
+            <Select value={model} onValueChange={setModel}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gpt-4o">GPT-4o (Default)</SelectItem>
+                <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
+                <SelectItem value="gpt-4.5-preview">GPT-4.5 Preview</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex justify-end">
             <Button onClick={handleSave}>Save Settings</Button>
           </div>
@@ -65,4 +86,3 @@ const SettingsModal = ({ onApiKeyChange }: SettingsModalProps) => {
 };
 
 export default SettingsModal;
-

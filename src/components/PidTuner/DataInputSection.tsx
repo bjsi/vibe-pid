@@ -1,8 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 interface DataInputSectionProps {
   csvData: string;
@@ -15,9 +15,14 @@ const DataInputSection = ({ csvData, onDataInput, loading }: DataInputSectionPro
     <div className="space-y-4 py-4">
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Enter CSV Data</h3>
-        <p className="text-sm text-gray-500">
-          Paste your CSV data in the following format:
-        </p>
+        <Alert className="bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-700">
+            Log data from your device in CSV format, then copy and paste it here. The data should include timestamps,
+            input values, output values, setpoint, error, and PID parameters.
+          </AlertDescription>
+        </Alert>
+        <p className="text-sm text-gray-500">Format your CSV data as:</p>
         <pre className="p-2 bg-gray-50 rounded-md text-sm font-mono">
           ms,input,output,setpoint,error,Kp,Ki,Kd
         </pre>
