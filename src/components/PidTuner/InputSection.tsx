@@ -1,38 +1,43 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Loader2, X } from "lucide-react";
-import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { Dispatch, SetStateAction } from "react";
 
 interface InputSectionProps {
   prompt: string;
   setPrompt: (value: string) => void;
   onGetSuggestion: () => void;
   loading: boolean;
+  attachedImages: string[];
+  setAttachedImages: Dispatch<SetStateAction<string[]>>;
 }
 
 const InputSection = ({ 
   prompt, 
   setPrompt, 
-  onGetSuggestion,
-  loading 
+  onGetSuggestion, 
+  loading,
+  attachedImages,
+  setAttachedImages
 }: InputSectionProps) => {
-  const [attachedImages, setAttachedImages] = useState<string[]>([]);
-
-  const handlePaste = (e: React.ClipboardEvent) => {
+  const handlePaste = async (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
-    for (const item of items) {
+    
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
       if (item.type.indexOf('image') !== -1) {
-        const file = item.getAsFile();
-        if (file) {
+        e.preventDefault();
+        const blob = item.getAsFile();
+        if (blob) {
           const reader = new FileReader();
-          reader.onloadend = () => {
-            setAttachedImages(prev => [...prev, reader.result as string]);
+          reader.onload = (e) => {
+            const base64Image = e.target?.result as string;
+            setAttachedImages(prev => [...prev, base64Image]);
           };
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(blob);
         }
-        break;
       }
     }
   };
@@ -44,15 +49,11 @@ const InputSection = ({
   return (
     <div className="space-y-4 py-4">
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">Describe Your PID Tuning Task</h3>
-        <p className="text-sm text-gray-500">
-          Tell us about what you're trying to control (e.g., temperature, motor position),
-          the system characteristics, and any specific requirements.
-        </p>
+        <h3 className="text-lg font-medium">Describe Your PID Tuning Requirements</h3>
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Pro tip: You can paste images (screenshots, graphs, etc.) directly into the text box below by using Ctrl+V or Cmd+V.
+            Describe your system and tuning goals in detail. You can also paste images of your system's current behavior or setup.
           </AlertDescription>
         </Alert>
       </div>

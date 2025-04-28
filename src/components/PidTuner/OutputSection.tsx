@@ -1,10 +1,10 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArrowRight, Copy, History } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { marked } from "marked";
 
 interface OutputSectionProps {
   suggestion: string | null;
@@ -58,9 +58,10 @@ const OutputSection = ({ suggestion, previousSuggestions, onProceed }: OutputSec
               <Copy className="h-4 w-4" />
             </Button>
           </div>
-          <pre className="p-4 bg-gray-50 rounded-md whitespace-pre-wrap">
-            {suggestion}
-          </pre>
+          <div 
+            className="prose prose-sm max-w-none dark:prose-invert"
+            dangerouslySetInnerHTML={{ __html: marked(suggestion) }}
+          />
         </CardContent>
       </Card>
       
@@ -80,9 +81,10 @@ const OutputSection = ({ suggestion, previousSuggestions, onProceed }: OutputSec
                       <Copy className="h-3 w-3" />
                     </Button>
                   </div>
-                  <pre className="text-sm p-2 bg-gray-50 rounded-md whitespace-pre-wrap">
-                    {item}
-                  </pre>
+                  <div 
+                    className="prose prose-sm max-w-none dark:prose-invert"
+                    dangerouslySetInnerHTML={{ __html: marked(item) }}
+                  />
                 </CardContent>
               </Card>
             ))}

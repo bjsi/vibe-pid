@@ -19,37 +19,14 @@ const DataInputSection = ({ csvData, onDataInput, loading }: DataInputSectionPro
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-700">
             Log data from your device in CSV format, then copy and paste it here. The data should include timestamps,
-            input values, output values, setpoint, error, and PID parameters.
+            input values, output values, setpoint and PID parameters.
           </AlertDescription>
         </Alert>
         <p className="text-sm text-gray-500">Format your CSV data as:</p>
         <pre className="p-2 bg-gray-50 rounded-md text-sm font-mono">
-          ms,input,output,setpoint,error,Kp,Ki,Kd
+          ms,input,output,setpoint,Kp,Ki,Kd
         </pre>
       </div>
-
-      <Alert variant="default" className="bg-amber-50 border-amber-200">
-        <AlertCircle className="h-4 w-4 text-amber-600" />
-        <AlertTitle className="text-amber-800">Important</AlertTitle>
-        <AlertDescription className="text-amber-700">
-          Make sure your data includes all the columns in the correct order. The data will be used to visualize
-          the performance and generate improved PID parameters.
-        </AlertDescription>
-      </Alert>
-
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          When requesting updated PID parameters, we'll include:
-          <ul className="list-disc pl-6 mt-2 space-y-1">
-            <li>A screenshot of your system response graph</li>
-            <li>Your raw CSV data for detailed analysis</li>
-            <li>Current PID parameters (Kp, Ki, Kd)</li>
-            <li>Previous suggestions and their outcomes</li>
-          </ul>
-          This context helps in providing more accurate and informed PID tuning recommendations.
-        </AlertDescription>
-      </Alert>
       
       <Textarea
         placeholder="Paste your CSV data here..."

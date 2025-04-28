@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -8,7 +7,7 @@ import { toast } from "sonner";
 
 interface SettingsModalProps {
   onApiKeyChange: (key: string) => void;
-  onModelChange?: (model: string) => void;
+  onModelChange: (model: string) => void;
 }
 
 const SettingsModal = ({ onApiKeyChange, onModelChange }: SettingsModalProps) => {
@@ -24,7 +23,7 @@ const SettingsModal = ({ onApiKeyChange, onModelChange }: SettingsModalProps) =>
       onApiKeyChange(savedKey);
     }
     setModel(savedModel);
-    onModelChange?.(savedModel);
+    onModelChange(savedModel);
   }, [onApiKeyChange, onModelChange]);
 
   const handleSave = () => {
@@ -32,7 +31,7 @@ const SettingsModal = ({ onApiKeyChange, onModelChange }: SettingsModalProps) =>
       localStorage.setItem("openai_api_key", apiKey);
       localStorage.setItem("openai_model", model);
       onApiKeyChange(apiKey);
-      onModelChange?.(model);
+      onModelChange(model);
       toast.success("Settings saved successfully");
       setOpen(false);
     } else {
@@ -66,7 +65,7 @@ const SettingsModal = ({ onApiKeyChange, onModelChange }: SettingsModalProps) =>
             <p className="text-sm font-medium">Model Name</p>
             <Input
               type="text"
-              placeholder="gpt-4o"
+              placeholder="o4-mini"
               value={model}
               onChange={(e) => setModel(e.target.value)}
               className="font-mono"

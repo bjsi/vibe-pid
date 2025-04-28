@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, RefreshCw, Copy } from "lucide-react";
+import { Loader2, RefreshCw, Copy, Info } from "lucide-react";
 import { PidData } from "./PidTuner";
 import { toast } from "sonner";
 import { 
@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { useState, useRef } from "react";
 import html2canvas from "html2canvas";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface DataVisualizationProps {
   data: PidData[];

@@ -1,5 +1,4 @@
-
-import { Sliders } from "lucide-react";
+import { Sliders, Github } from "lucide-react";
 
 const Header = () => {
   return (
@@ -8,13 +7,21 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Sliders className="w-8 h-8 text-pid-blue" />
           <h1 className="text-2xl font-bold text-gray-800">
-            Vibe Your PID
+            Vibe PID
           </h1>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">
-            PID Controller Tuning with GPT
+            A PID Tuner for the 21st Century
           </span>
+          <a 
+            href="https://github.com/bjsi/vibe-pid" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <Github className="w-5 h-5" />
+          </a>
         </div>
       </div>
     </header>

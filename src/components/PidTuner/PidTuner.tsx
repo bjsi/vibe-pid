@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InputSection from "./InputSection";
@@ -7,13 +7,15 @@ import DataInputSection from "./DataInputSection";
 import DataVisualization from "./DataVisualization";
 import SettingsModal from "./SettingsModal";
 import { toast } from "sonner";
+import { createOpenAIClient, generateInitialPIDParams, generateUpdatedPIDParams } from "@/lib/openai";
+import type OpenAI from "openai";
+import html2canvas from "html2canvas";
 
 export interface PidData {
   ms: number;
   input: number;
   output: number;
   setpoint: number;
-  error: number;
   Kp: number;
   Ki: number;
   Kd: number;
@@ -28,7 +30,30 @@ const PidTuner = () => {
   const [activeTab, setActiveTab] = useState<string>("input");
   const [previousSuggestions, setPreviousSuggestions] = useState<string[]>([]);
   const [apiKey, setApiKey] = useState<string>("");
-  
+  const [model, setModel] = useState<string>("gpt-4-vision-preview");
+  const [openai, setOpenai] = useState<OpenAI | null>(null);
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
+
+  // Load API key and create client on mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem("openai_api_key");
+    if (savedKey) {
+      setApiKey(savedKey);
+      const client = createOpenAIClient(savedKey);
+      setOpenai(client);
+    }
+  }, []);
+
+  // Update OpenAI client when API key changes
+  useEffect(() => {
+    if (apiKey) {
+      const client = createOpenAIClient(apiKey);
+      setOpenai(client);
+    } else {
+      setOpenai(null);
+    }
+  }, [apiKey]);
+
   const handleGetSuggestion = async () => {
     if (!prompt.trim()) {
       toast.error("Please describe what you want to tune");
@@ -42,20 +67,18 @@ const PidTuner = () => {
     
     setLoading(true);
     try {
-      // Mock API call for now - in a real implementation we would connect to an AI API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const client = createOpenAIClient(apiKey);
+      setOpenai(client);
       
-      // For demonstration, generate a mock suggestion
-      const mockSuggestion = `Based on your description, I suggest starting with these PID parameters:
+      const suggestion = await generateInitialPIDParams(
+        client,
+        model,
+        prompt,
+        attachedImages
+      );
       
-Kp = 2.5
-Ki = 0.06
-Kd = 8.0
-
-Try these values first and then share the resulting data so I can help refine them further.`;
-      
-      setSuggestion(mockSuggestion);
-      setPreviousSuggestions(prev => [...prev, mockSuggestion]);
+      setSuggestion(suggestion);
+      setPreviousSuggestions(prev => [...prev, suggestion]);
       toast.success("Received PID parameter suggestions!");
       setActiveTab("output");
     } catch (error) {
@@ -85,10 +108,9 @@ Try these values first and then share the resulting data so I can help refine th
             input: parseFloat(values[1]),
             output: parseFloat(values[2]),
             setpoint: parseFloat(values[3]),
-            error: parseFloat(values[4]),
-            Kp: parseFloat(values[5]),
-            Ki: parseFloat(values[6]),
-            Kd: parseFloat(values[7]),
+            Kp: parseFloat(values[4]),
+            Ki: parseFloat(values[5]),
+            Kd: parseFloat(values[6]),
           });
         }
       }
@@ -111,29 +133,53 @@ Try these values first and then share the resulting data so I can help refine th
       toast.error("Please input data before requesting a new suggestion");
       return;
     }
+
+    if (!apiKey || !openai) {
+      toast.error("Please set your OpenAI API key in settings");
+      return;
+    }
     
     setLoading(true);
     
     try {
-      // Mock API call for now
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Get the latest PID parameters from the data
+      const latestParams = parsedData[parsedData.length - 1];
       
-      // For demonstration, generate a new mock suggestion based on "data"
-      const mockNewSuggestion = `Based on the data you provided, I recommend adjusting your PID parameters to:
-      
-Kp = 2.2
-Ki = 0.08
-Kd = 7.5
+      // Get the graph image as base64
+      const graphElement = document.querySelector('.recharts-wrapper') as HTMLDivElement;
+      if (!graphElement) {
+        toast.error("Could not capture graph image");
+        return;
+      }
 
-I've reduced Kp slightly to decrease overshoot and increased Ki to improve steady-state response.`;
+      // Use html2canvas to capture the graph
+      const canvas = await html2canvas(graphElement);
+      const graphImage = canvas.toDataURL('image/png');
       
-      setSuggestion(mockNewSuggestion);
-      setPreviousSuggestions(prev => [...prev, mockNewSuggestion]);
+      if (!graphImage || graphImage === 'data:,') {
+        toast.error("Failed to capture graph image");
+        return;
+      }
+      
+      const suggestion = await generateUpdatedPIDParams(
+        openai,
+        model,
+        previousSuggestions,
+        {
+          Kp: latestParams.Kp,
+          Ki: latestParams.Ki,
+          Kd: latestParams.Kd
+        },
+        graphImage
+      );
+      
+      setSuggestion(suggestion);
+      setPreviousSuggestions(prev => [...prev, suggestion]);
       toast.success("Received new PID parameter suggestions!");
       setActiveTab("output");
     } catch (error) {
-      toast.error("Failed to get new suggestions. Please try again.");
       console.error("Error getting new suggestion:", error);
+      toast.error("Failed to get new suggestions. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -143,8 +189,11 @@ I've reduced Kp slightly to decrease overshoot and increased Ki to improve stead
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>PID Controller Tuning Assistant</CardTitle>
-          <SettingsModal onApiKeyChange={setApiKey} />
+          <CardTitle>PID <span className="line-through">Tuner</span> Viber</CardTitle>
+          <SettingsModal 
+            onApiKeyChange={setApiKey} 
+            onModelChange={setModel}
+          />
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -161,6 +210,8 @@ I've reduced Kp slightly to decrease overshoot and increased Ki to improve stead
                 setPrompt={setPrompt} 
                 onGetSuggestion={handleGetSuggestion}
                 loading={loading}
+                attachedImages={attachedImages}
+                setAttachedImages={setAttachedImages}
               />
             </TabsContent>
             

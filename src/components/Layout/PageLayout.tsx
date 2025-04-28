@@ -14,7 +14,7 @@ const PageLayout = ({ children }: PageLayoutProps) => {
         {children}
       </main>
       <footer className="py-4 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Vibe Your PID - Automate PID Controller Tuning with GPT
+        © {new Date().getFullYear()} Vibe PID - Automate PID Controller Tuning
       </footer>
     </div>
   );
