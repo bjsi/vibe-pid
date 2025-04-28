@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Settings } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -64,17 +63,14 @@ const SettingsModal = ({ onApiKeyChange, onModelChange }: SettingsModalProps) =>
             />
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium">Model</p>
-            <Select value={model} onValueChange={setModel}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4o">GPT-4o (Default)</SelectItem>
-                <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
-                <SelectItem value="gpt-4.5-preview">GPT-4.5 Preview</SelectItem>
-              </SelectContent>
-            </Select>
+            <p className="text-sm font-medium">Model Name</p>
+            <Input
+              type="text"
+              placeholder="gpt-4o"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="font-mono"
+            />
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSave}>Save Settings</Button>

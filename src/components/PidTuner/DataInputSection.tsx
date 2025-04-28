@@ -1,8 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowRight, Loader2, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 
 interface DataInputSectionProps {
   csvData: string;
@@ -34,6 +34,20 @@ const DataInputSection = ({ csvData, onDataInput, loading }: DataInputSectionPro
         <AlertDescription className="text-amber-700">
           Make sure your data includes all the columns in the correct order. The data will be used to visualize
           the performance and generate improved PID parameters.
+        </AlertDescription>
+      </Alert>
+
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          When requesting updated PID parameters, we'll include:
+          <ul className="list-disc pl-6 mt-2 space-y-1">
+            <li>A screenshot of your system response graph</li>
+            <li>Your raw CSV data for detailed analysis</li>
+            <li>Current PID parameters (Kp, Ki, Kd)</li>
+            <li>Previous suggestions and their outcomes</li>
+          </ul>
+          This context helps in providing more accurate and informed PID tuning recommendations.
         </AlertDescription>
       </Alert>
       
