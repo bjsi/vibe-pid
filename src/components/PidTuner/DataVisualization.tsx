@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, RefreshCw } from "lucide-react";
@@ -95,19 +94,11 @@ const DataVisualization = ({ data, onNewIteration, loading }: DataVisualizationP
                     />
                     <Line 
                       type="monotone" 
-                      dataKey="output" 
+                      dataKey="input" 
                       stroke="#ef4444" 
                       dot={false} 
                       strokeWidth={2}
-                      name="Output"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="error" 
-                      stroke="#6b7280" 
-                      dot={false}
-                      strokeDasharray="5 5" 
-                      name="Error" 
+                      name="Input"
                     />
                   </>
                 ) : (
