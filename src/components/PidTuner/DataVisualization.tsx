@@ -15,16 +15,18 @@ import {
 } from "recharts";
 import { useState, useRef } from "react";
 import html2canvas from "html2canvas";
-import { Alert, AlertDescription } from "../ui/alert";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
 
 interface DataVisualizationProps {
   data: PidData[];
-  onNewIteration: () => void;
+  onNewIteration: (notes?: string) => void;
   loading: boolean;
 }
 
 const DataVisualization = ({ data, onNewIteration, loading }: DataVisualizationProps) => {
   const [visualization, setVisualization] = useState<"response" | "variables">("response");
+  const [notes, setNotes] = useState("");
   const chartRef = useRef<HTMLDivElement>(null);
   
   const handleCopyGraph = async () => {
@@ -71,49 +73,11 @@ const DataVisualization = ({ data, onNewIteration, loading }: DataVisualizationP
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">PID Response Visualization</h3>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleCopyGraph}
-              className="flex items-center gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              Copy Graph
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleCopyContext}
-              className="flex items-center gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              Copy Context
-            </Button>
-          </div>
         </div>
         <div className="flex justify-between items-center">
           <p className="text-sm text-gray-500">
             Visualizing {data.length} data points from your test run.
           </p>
-          <div className="flex gap-2">
-            <Button 
-              variant={visualization === "response" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setVisualization("response")}
-              className={visualization === "response" ? "bg-pid-blue hover:bg-blue-700" : ""}
-            >
-              System Response
-            </Button>
-            <Button 
-              variant={visualization === "variables" ? "default" : "outline"} 
-              size="sm"
-              onClick={() => setVisualization("variables")}
-              className={visualization === "variables" ? "bg-pid-blue hover:bg-blue-700" : ""}
-            >
-              PID Variables
-            </Button>
-          </div>
         </div>
       </div>
       
@@ -184,30 +148,20 @@ const DataVisualization = ({ data, onNewIteration, loading }: DataVisualizationP
         </CardContent>
       </Card>
       
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <h4 className="text-sm font-medium text-gray-500">Kp Value</h4>
-            <p className="text-2xl font-bold text-pid-blue">{latestValues.Kp.toFixed(2)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <h4 className="text-sm font-medium text-gray-500">Ki Value</h4>
-            <p className="text-2xl font-bold text-pid-green">{latestValues.Ki.toFixed(4)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <h4 className="text-sm font-medium text-gray-500">Kd Value</h4>
-            <p className="text-2xl font-bold text-pid-teal">{latestValues.Kd.toFixed(2)}</p>
-          </CardContent>
-        </Card>
+      <div className="space-y-2">
+        <Label htmlFor="notes">Additional Notes for AI (Optional)</Label>
+        <Textarea
+          id="notes"
+          placeholder="Add any observations or specific aspects you'd like the AI to consider when suggesting improved parameters..."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="min-h-[100px]"
+        />
       </div>
       
       <div className="flex justify-end">
         <Button 
-          onClick={onNewIteration} 
+          onClick={() => onNewIteration(notes)} 
           disabled={loading}
           className="bg-pid-teal hover:bg-teal-700"
         >

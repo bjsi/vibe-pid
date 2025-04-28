@@ -51,6 +51,7 @@ const PidTuner = () => {
     ki: '',
     kd: ''
   });
+  const [useExistingParams, setUseExistingParams] = useState(false);
 
   const hasValidPidValues = () => {
     return pidValues.kp !== '' && pidValues.ki !== '' && pidValues.kd !== '';
@@ -157,7 +158,7 @@ const PidTuner = () => {
     }
   };
 
-  const handleNewIteration = async () => {
+  const handleNewIteration = async (notes?: string) => {
     if (parsedData.length === 0) {
       toast.error("Please input data before requesting a new suggestion");
       return;
@@ -186,6 +187,11 @@ const PidTuner = () => {
         toast.error("Failed to capture graph image");
         return;
       }
+
+      // Include user notes in the prompt if provided
+      const enhancedPrompt = notes 
+        ? `User notes: ${notes}\n\nPlease analyze the graph and suggest improved PID parameters.`
+        : "Please analyze the graph and suggest improved PID parameters.";
       
       const suggestion = await generateUpdatedPIDParams(
         openai,
@@ -196,7 +202,8 @@ const PidTuner = () => {
           Ki: latestParams.Ki,
           Kd: latestParams.Kd
         },
-        graphImage
+        graphImage,
+        enhancedPrompt
       );
       
       setSuggestion(suggestion);
@@ -241,6 +248,8 @@ const PidTuner = () => {
                 setActiveTab={setActiveTab}
                 pidValues={pidValues}
                 setPidValues={setPidValues}
+                useExistingParams={useExistingParams}
+                setUseExistingParams={setUseExistingParams}
               />
             </TabsContent>
             

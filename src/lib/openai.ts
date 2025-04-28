@@ -60,7 +60,8 @@ export const generateUpdatedPIDParams = async (
   model: string,
   previousInteractions: string[],
   currentParams: { Kp: number; Ki: number; Kd: number },
-  graphImage: string
+  graphImage: string,
+  prompt?: string
 ) => {
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     {
@@ -72,7 +73,7 @@ export const generateUpdatedPIDParams = async (
       content: [
         {
           type: "text" as const,
-          text: `Previous interactions:\n${previousInteractions.join('\n\n')}\n\nCurrent PID Parameters:\nKp: ${currentParams.Kp}\nKi: ${currentParams.Ki}\nKd: ${currentParams.Kd}`
+          text: `${prompt || ''}\n\nPrevious interactions:\n${previousInteractions.join('\n\n')}\n\nCurrent PID Parameters:\nKp: ${currentParams.Kp}\nKi: ${currentParams.Ki}\nKd: ${currentParams.Kd}`
         },
         {
           type: "image_url" as const,
@@ -88,15 +89,11 @@ export const generateUpdatedPIDParams = async (
   console.log('Sending updated PID params request:', {
     model,
     messages,
-    // temperature: 0.7,
-    // max_tokens: 1000
   });
 
   const response = await openai.chat.completions.create({
     model,
     messages,
-    // temperature: 0.7,
-    // max_tokens: 1000
   });
 
   console.log('Received updated PID params response:', response.choices[0].message);

@@ -2,9 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Loader2, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -24,6 +22,8 @@ interface InputSectionProps {
   setActiveTab: (tab: string) => void;
   pidValues: PidValues;
   setPidValues: Dispatch<SetStateAction<PidValues>>;
+  useExistingParams: boolean;
+  setUseExistingParams: Dispatch<SetStateAction<boolean>>;
 }
 
 const InputSection = ({ 
@@ -35,10 +35,10 @@ const InputSection = ({
   setAttachedImages,
   setActiveTab,
   pidValues,
-  setPidValues
+  setPidValues,
+  useExistingParams,
+  setUseExistingParams
 }: InputSectionProps) => {
-  const [useExistingParams, setUseExistingParams] = useState(false);
-
   const handlePaste = async (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
     
