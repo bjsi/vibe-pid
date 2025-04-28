@@ -36,7 +36,7 @@ const DataInputSection = ({ csvData, onDataInput, loading }: DataInputSectionPro
         placeholder="Paste your CSV data here..."
         className="min-h-[300px] font-mono text-sm"
         value={csvData}
-        onChange={(e) => e.target.value !== csvData && e.target.value}
+        onChange={(e) => onDataInput(e.target.value)}
       />
       
       <div className="flex justify-end">
