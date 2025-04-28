@@ -1,13 +1,18 @@
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Loader2, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+
+interface PidValues {
+  kp: string;
+  ki: string;
+  kd: string;
+}
 
 interface InputSectionProps {
   prompt: string;
@@ -16,16 +21,24 @@ interface InputSectionProps {
   loading: boolean;
   attachedImages: string[];
   setAttachedImages: Dispatch<SetStateAction<string[]>>;
+  setActiveTab: (tab: string) => void;
+  pidValues: PidValues;
+  setPidValues: Dispatch<SetStateAction<PidValues>>;
 }
 
 const InputSection = ({ 
   prompt, 
   setPrompt, 
-  onGetSuggestion, 
+  onGetSuggestion,
   loading,
   attachedImages,
-  setAttachedImages
+  setAttachedImages,
+  setActiveTab,
+  pidValues,
+  setPidValues
 }: InputSectionProps) => {
+  const [useExistingParams, setUseExistingParams] = useState(false);
+
   const handlePaste = async (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
     
@@ -50,38 +63,75 @@ const InputSection = ({
     setAttachedImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handlePidChange = (field: keyof PidValues, value: string) => {
+    setPidValues(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const hasValidPidValues = () => {
+    return pidValues.kp !== '' && pidValues.ki !== '' && pidValues.kd !== '';
+  };
+
+  const handleButtonClick = () => {
+    if (useExistingParams) {
+      setActiveTab("data");
+    } else {
+      onGetSuggestion();
+    }
+  };
+
   return (
     <div className="space-y-4 py-4">
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Describe Your PID Tuning Requirements</h3>
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            You can either describe your system to get initial PID parameters, or input your existing parameters below to skip straight to optimization. You can also paste images of your system's current behavior or setup.
-          </AlertDescription>
-        </Alert>
       </div>
       
       <div className="space-y-4 border rounded-lg p-4">
         <div className="flex items-center space-x-2">
-          <Checkbox id="useExisting" />
+          <Checkbox 
+            id="useExisting" 
+            checked={useExistingParams}
+            onCheckedChange={(checked) => setUseExistingParams(checked as boolean)}
+          />
           <Label htmlFor="useExisting">I already have PID parameters to optimize</Label>
         </div>
         
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="kp">Kp Value</Label>
-            <Input id="kp" type="number" placeholder="0.0" />
+        {useExistingParams && (
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="kp">Kp Value</Label>
+              <Input 
+                id="kp" 
+                type="number" 
+                placeholder="0.0" 
+                value={pidValues.kp}
+                onChange={(e) => handlePidChange('kp', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ki">Ki Value</Label>
+              <Input 
+                id="ki" 
+                type="number" 
+                placeholder="0.0" 
+                value={pidValues.ki}
+                onChange={(e) => handlePidChange('ki', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="kd">Kd Value</Label>
+              <Input 
+                id="kd" 
+                type="number" 
+                placeholder="0.0" 
+                value={pidValues.kd}
+                onChange={(e) => handlePidChange('kd', e.target.value)}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="ki">Ki Value</Label>
-            <Input id="ki" type="number" placeholder="0.0" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="kd">Kd Value</Label>
-            <Input id="kd" type="number" placeholder="0.0" />
-          </div>
-        </div>
+        )}
       </div>
       
       {attachedImages.length > 0 && (
@@ -105,7 +155,7 @@ const InputSection = ({
       )}
       
       <Textarea
-        placeholder="If you're starting fresh: describe your system and tuning goals. Example: I need to tune a PID controller for a heating element that controls the temperature of a 3D printer hotend."
+        placeholder="Describe your system and tuning goals. Example: I need to tune a PID controller for a heating element that controls the temperature of a 3D printer hotend."
         className="min-h-[200px]"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
@@ -113,7 +163,11 @@ const InputSection = ({
       />
       
       <div className="flex justify-end">
-        <Button onClick={onGetSuggestion} disabled={loading} className="bg-pid-blue hover:bg-blue-700">
+        <Button 
+          onClick={handleButtonClick} 
+          disabled={loading || (useExistingParams && !hasValidPidValues())} 
+          className="bg-pid-blue hover:bg-blue-700"
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -121,7 +175,7 @@ const InputSection = ({
             </>
           ) : (
             <>
-              {prompt.trim() ? "Get PID Parameter Suggestions" : "Proceed to Data Input"}
+              {useExistingParams ? "Proceed to Data Input" : "Get PID Parameter Suggestions"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </>
           )}

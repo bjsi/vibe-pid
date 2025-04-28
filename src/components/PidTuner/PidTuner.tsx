@@ -27,6 +27,12 @@ interface InitialPidParams {
   Kd: number;
 }
 
+interface PidValues {
+  kp: string;
+  ki: string;
+  kd: string;
+}
+
 const PidTuner = () => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,6 +46,15 @@ const PidTuner = () => {
   const [openai, setOpenai] = useState<OpenAI | null>(null);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [initialParams, setInitialParams] = useState<InitialPidParams | null>(null);
+  const [pidValues, setPidValues] = useState<PidValues>({
+    kp: '',
+    ki: '',
+    kd: ''
+  });
+
+  const hasValidPidValues = () => {
+    return pidValues.kp !== '' && pidValues.ki !== '' && pidValues.kd !== '';
+  };
 
   useEffect(() => {
     const savedKey = localStorage.getItem("openai_api_key");
@@ -81,10 +96,14 @@ const PidTuner = () => {
       const client = createOpenAIClient(apiKey);
       setOpenai(client);
       
+      const enhancedPrompt = hasValidPidValues() 
+        ? `Initial PID values provided by the user: Kp=${pidValues.kp}, Ki=${pidValues.ki}, Kd=${pidValues.kd}\n\n${prompt}`
+        : prompt;
+      
       const suggestion = await generateInitialPIDParams(
         client,
         model,
-        prompt,
+        enhancedPrompt,
         attachedImages
       );
       
@@ -219,6 +238,9 @@ const PidTuner = () => {
                 loading={loading}
                 attachedImages={attachedImages}
                 setAttachedImages={setAttachedImages}
+                setActiveTab={setActiveTab}
+                pidValues={pidValues}
+                setPidValues={setPidValues}
               />
             </TabsContent>
             
