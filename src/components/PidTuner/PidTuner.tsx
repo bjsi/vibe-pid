@@ -21,6 +21,12 @@ export interface PidData {
   Kd: number;
 }
 
+interface InitialPidParams {
+  Kp: number;
+  Ki: number;
+  Kd: number;
+}
+
 const PidTuner = () => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,8 +39,8 @@ const PidTuner = () => {
   const [model, setModel] = useState<string>("gpt-4-vision-preview");
   const [openai, setOpenai] = useState<OpenAI | null>(null);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const [initialParams, setInitialParams] = useState<InitialPidParams | null>(null);
 
-  // Load API key and create client on mount
   useEffect(() => {
     const savedKey = localStorage.getItem("openai_api_key");
     if (savedKey) {
@@ -44,7 +50,6 @@ const PidTuner = () => {
     }
   }, []);
 
-  // Update OpenAI client when API key changes
   useEffect(() => {
     if (apiKey) {
       const client = createOpenAIClient(apiKey);
@@ -55,16 +60,22 @@ const PidTuner = () => {
   }, [apiKey]);
 
   const handleGetSuggestion = async () => {
-    if (!prompt.trim()) {
-      toast.error("Please describe what you want to tune");
-      return;
-    }
-
     if (!apiKey) {
       toast.error("Please set your OpenAI API key in settings");
       return;
     }
+
+    if (!initialParams && !prompt.trim()) {
+      toast.error("Please either describe what you want to tune or provide existing PID parameters");
+      return;
+    }
     
+    if (initialParams) {
+      toast.success("Using provided PID parameters");
+      setActiveTab("data");
+      return;
+    }
+
     setLoading(true);
     try {
       const client = createOpenAIClient(apiKey);
@@ -95,7 +106,6 @@ const PidTuner = () => {
     try {
       const lines = data.trim().split('\n');
       
-      // Skip header if present
       const startIndex = lines[0].startsWith('ms,') ? 1 : 0;
       
       const parsedRows: PidData[] = [];
@@ -142,17 +152,14 @@ const PidTuner = () => {
     setLoading(true);
     
     try {
-      // Get the latest PID parameters from the data
       const latestParams = parsedData[parsedData.length - 1];
       
-      // Get the graph image as base64
       const graphElement = document.querySelector('.recharts-wrapper') as HTMLDivElement;
       if (!graphElement) {
         toast.error("Could not capture graph image");
         return;
       }
 
-      // Use html2canvas to capture the graph
       const canvas = await html2canvas(graphElement);
       const graphImage = canvas.toDataURL('image/png');
       

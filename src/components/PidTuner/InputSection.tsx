@@ -1,9 +1,13 @@
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { ArrowRight, Loader2, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface InputSectionProps {
   prompt: string;
@@ -53,9 +57,31 @@ const InputSection = ({
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Describe your system and tuning goals in detail. You can also paste images of your system's current behavior or setup.
+            You can either describe your system to get initial PID parameters, or input your existing parameters below to skip straight to optimization. You can also paste images of your system's current behavior or setup.
           </AlertDescription>
         </Alert>
+      </div>
+      
+      <div className="space-y-4 border rounded-lg p-4">
+        <div className="flex items-center space-x-2">
+          <Checkbox id="useExisting" />
+          <Label htmlFor="useExisting">I already have PID parameters to optimize</Label>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="kp">Kp Value</Label>
+            <Input id="kp" type="number" placeholder="0.0" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="ki">Ki Value</Label>
+            <Input id="ki" type="number" placeholder="0.0" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="kd">Kd Value</Label>
+            <Input id="kd" type="number" placeholder="0.0" />
+          </div>
+        </div>
       </div>
       
       {attachedImages.length > 0 && (
@@ -79,7 +105,7 @@ const InputSection = ({
       )}
       
       <Textarea
-        placeholder="Example: I need to tune a PID controller for a heating element that controls the temperature of a 3D printer hotend. The temperature range is 180-260°C, and I need minimal overshoot with fast response time."
+        placeholder="If you're starting fresh: describe your system and tuning goals. Example: I need to tune a PID controller for a heating element that controls the temperature of a 3D printer hotend."
         className="min-h-[200px]"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
@@ -95,7 +121,7 @@ const InputSection = ({
             </>
           ) : (
             <>
-              Get PID Parameter Suggestions
+              {prompt.trim() ? "Get PID Parameter Suggestions" : "Proceed to Data Input"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </>
           )}
