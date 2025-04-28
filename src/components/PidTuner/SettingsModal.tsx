@@ -12,12 +12,12 @@ interface SettingsModalProps {
 
 const SettingsModal = ({ onApiKeyChange, onModelChange }: SettingsModalProps) => {
   const [apiKey, setApiKey] = useState("");
-  const [model, setModel] = useState("gpt-4o");
+  const [model, setModel] = useState("o4-mini");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const savedKey = localStorage.getItem("openai_api_key");
-    const savedModel = localStorage.getItem("openai_model") || "gpt-4o";
+    const savedModel = localStorage.getItem("openai_model") || "o4-mini";
     if (savedKey) {
       setApiKey(savedKey);
       onApiKeyChange(savedKey);
